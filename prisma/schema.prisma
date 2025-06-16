@@ -1,0 +1,404 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model Profile {
+  id               BigInt             @id @default(autoincrement()) @db.BigInt
+  telegram_id      BigInt             @unique
+  name             String             @db.VarChar
+  age              Int
+  gender           Gender?
+  bio              String?            @db.Text
+  purpose          Purpose?
+  weight           Int?
+  height           Int?
+  build            Build?
+  language         Language?
+  orientation      SexualOrientation?
+  alcohol          Alcohol?
+  smoking          Smoking?
+  kids             Kids?
+  living_condition LivingConditions?
+  income           Income?
+  education        Education?
+  interests        Json?              @db.JsonB
+  location         String
+  is_visible       Boolean
+  created_at       DateTime           @default(now()) @db.Timestamp(6)
+  last_active      DateTime           @db.Timestamp(6)
+
+  swipeAsSwiper     swipe[]             @relation("swiper")
+  swipeAsTarget     swipe[]             @relation("target")
+  subscriptions     user_subscription[]
+  payment           payment[]
+  moderator         moderator?
+  reportsAsReporter moderation_report[] @relation("reporter")
+  reportsAsTarget   moderation_report[] @relation("target")
+  gallery           user_gallery[]
+
+  chatsAsUser1 chat[] @relation("chat_user1")
+  chatsAsUser2 chat[] @relation("chat_user2")
+
+  sent_message message[]
+  wallet       wallet[]
+
+  @@index([telegram_id])
+  @@index([is_visible, last_active])
+  @@index([is_visible, last_active, gender]) // Комбинированный индекс для главной ленты
+  @@index([is_visible, purpose]) // Для поиска по цели знакомств
+  @@map("Profile")
+}
+
+model media {
+  id           BigInt    @id @default(autoincrement()) @db.BigInt
+  message_id   String?   @db.Uuid
+  aws_file_key String    @db.VarChar
+  type         MediaType
+
+  message message?       @relation("message_attachments", fields: [message_id], references: [id], onDelete: Cascade)
+  gallery user_gallery[]
+
+  @@index([message_id])
+}
+
+model chat {
+  id              String   @id @default(uuid()) @db.Uuid
+  user1_id        BigInt
+  user2_id        BigInt
+  created_at      DateTime @default(now()) @db.Timestamptz(6)
+  last_message_at DateTime @db.Timestamp(6)
+
+  user1   Profile   @relation("chat_user1", fields: [user1_id], references: [id], onDelete: Cascade)
+  user2   Profile   @relation("chat_user2", fields: [user2_id], references: [id], onDelete: Cascade)
+  message message[]
+
+  @@unique([user1_id, user2_id])
+  @@index([last_message_at])
+}
+
+model message {
+  id        String   @id @default(uuid()) @db.Uuid
+  chat_id   String   @db.Uuid
+  sender_id BigInt
+  content   String   @db.Text
+  sent_at   DateTime @db.Timestamp(6)
+  is_read   Boolean
+
+  chat        chat    @relation(fields: [chat_id], references: [id], onDelete: Cascade)
+  sender      Profile @relation(fields: [sender_id], references: [id])
+  attachments media[] @relation("message_attachments")
+
+  @@index([chat_id])
+  @@index([chat_id, sent_at])
+}
+
+model swipe {
+  swiper_id BigInt
+  target_id BigInt
+  is_like   Boolean
+  is_mutual Boolean
+  swiped_at DateTime @default(now()) @db.Timestamp(6)
+
+  swiper Profile @relation("swiper", fields: [swiper_id], references: [id], onDelete: Cascade)
+  target Profile @relation("target", fields: [target_id], references: [id], onDelete: Cascade)
+
+  @@id([swiper_id, target_id])
+  @@index([target_id, is_mutual])
+}
+
+model subscription_plan {
+  id            Int     @id @default(autoincrement()) @db.Integer
+  name          String  @db.VarChar
+  type          String  @db.VarChar
+  features      Json    @db.JsonB
+  price         Decimal @db.Decimal
+  duration_days Int
+  is_active     Boolean
+
+  subscriptions user_subscription[]
+}
+
+model user_subscription {
+  id              BigInt             @id @default(autoincrement()) @db.BigInt
+  user_id         BigInt
+  wallet_id       String             @db.Uuid
+  plan_code       Int
+  starts_at       DateTime           @db.Timestamp(6)
+  expires_at      DateTime           @db.Timestamp(6)
+  auto_renew      Boolean
+  status          SubscriptionStatus
+  last_payment_id String?
+
+  canceled_at DateTime? @db.Timestamp(6) // Дата отмены
+
+  user    Profile           @relation(fields: [user_id], references: [id])
+  plan    subscription_plan @relation(fields: [plan_code], references: [id])
+  wallet  wallet            @relation(fields: [wallet_id], references: [id])
+  payment payment?          @relation(fields: [last_payment_id], references: [id])
+
+  @@index([user_id, status, expires_at])
+}
+
+enum SubscriptionStatus {
+  EXPIRED
+  CANCELED
+  ACTIVE
+}
+
+model wallet {
+  id           String      @id @default(uuid()) @db.Uuid
+  profile_id   BigInt
+  type         PaymentType // "TON" | "STRIPE"
+  address      String? // Для TON: EQ..., для Stripe: pm_.../cus_...
+  chain        String? // "ton-mainnet" | "ton-testnet" (только для TON)
+  is_default   Boolean     @default(false)
+  connected_at DateTime    @default(now()) @db.Timestamp(6)
+  metadata     Json?       @db.JsonB
+
+  profile           Profile             @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  payments          payment[]
+  user_subscription user_subscription[]
+
+  @@index([profile_id, type]) // Оптимизация запросов
+}
+
+model payment {
+  id                String        @id @default(uuid()) @db.Uuid
+  //transaction_id String
+  wallet_id         String        @db.Uuid
+  subscription_id   String?       @db.Uuid // Если платёж за подписку
+  user_id           BigInt
+  amount            Decimal       @db.Decimal
+  currency          Currency
+  payment_method    PaymentType
+  tx_hash           String? // Для TON: хэш транзакции
+  stripe_payment_id String? // Для Stripe: pi_...
+  status            PaymentStatus @default(PENDING)
+  created_at        DateTime      @default(now()) @db.Timestamp(6)
+  metadata          Json          @db.JsonB
+
+  user          Profile             @relation(fields: [user_id], references: [id])
+  subscriptions user_subscription[]
+  wallet        wallet              @relation(fields: [wallet_id], references: [id])
+
+  @@index([user_id])
+  @@index([tx_hash]) // Для поиска платежей TON
+  @@index([stripe_payment_id]) // Для поиска платежей Stripe
+}
+
+model moderator {
+  user_id             BigInt @id
+  permission_level    Int
+  assigned_categories Json   @db.JsonB
+
+  user Profile @relation(fields: [user_id], references: [id])
+}
+
+model moderation_report {
+  id           BigInt   @id @default(autoincrement()) @db.BigInt
+  reporter_id  BigInt
+  target_id    BigInt
+  content_type String   @db.VarChar
+  reason       String   @db.VarChar
+  status       String   @db.VarChar
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+
+  reporter Profile @relation("reporter", fields: [reporter_id], references: [id])
+  target   Profile @relation("target", fields: [target_id], references: [id])
+
+  @@index([reporter_id])
+  @@index([target_id])
+}
+
+model user_gallery {
+  user_id  BigInt
+  media_id BigInt
+
+  user  Profile @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  media media   @relation(fields: [media_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, media_id])
+}
+
+enum PaymentType {
+  stripe
+  ton
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+  IN_PROCESS
+  REVERSED
+  CHARGEBACK
+  EXPIRED
+}
+
+enum Currency {
+  AED // United Arab Emirates Dirham
+  ARS // Argentine Peso
+  AUD // Australian Dollar
+  BDT // Bangladeshi Taka
+  BGN // Bulgarian Lev
+  BHD // Bahraini Dinar
+  BRL // Brazilian Real
+  CAD // Canadian Dollar
+  CHF // Swiss Franc
+  CLP // Chilean Peso
+  CNY // Chinese Yuan
+  COP // Colombian Peso
+  CZK // Czech Koruna
+  DKK // Danish Krone
+  EGP // Egyptian Pound
+  EUR // Euro
+  GBP // British Pound Sterling
+  HKD // Hong Kong Dollar
+  HUF // Hungarian Forint
+  IDR // Indonesian Rupiah
+  ILS // Israeli New Sheqel
+  INR // Indian Rupee
+  JPY // Japanese Yen
+  KRW // South Korean Won
+  KWD // Kuwaiti Dinar
+  LKR // Sri Lankan Rupee
+  MAD // Moroccan Dirham
+  MXN // Mexican Peso
+  MYR // Malaysian Ringgit
+  NGN // Nigerian Naira
+  NOK // Norwegian Krone
+  NZD // New Zealand Dollar
+  OMR // Omani Rial
+  PEN // Peruvian Nuevo Sol
+  PHP // Philippine Peso
+  PKR // Pakistani Rupee
+  PLN // Polish Zloty
+  QAR // Qatari Rial
+  RON // Romanian Leu
+  RUB // Russian Ruble
+  SAR // Saudi Riyal
+  SEK // Swedish Krona
+  SGD // Singapore Dollar
+  THB // Thai Baht
+  TRY // Turkish Lira
+  TWD // New Taiwan Dollar
+  USD // United States Dollar
+  VEF // Venezuelan Bolívar
+  VND // Vietnamese Dong
+  ZAR // South African Rand
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Purpose {
+  RELATIONSHIP
+  FRIENDSHIP
+  FLIRTING
+  DECIDEWHENMEET
+}
+
+enum Education {
+  SECONDARY
+  SPECIALIZED_SECONDARY
+  INCOMPLETE_HIGHER
+  HIGHER
+  BACHELOR
+  MASTER
+  PHD
+  MBA
+}
+
+enum Income {
+  BELOW_AVERAGE
+  AVERAGE
+  ABOVE_AVERAGE
+  HIGH
+  VERY_HIGH
+}
+
+enum LivingConditions {
+  WITH_PARENTS
+  RENT
+  OWN_HOUSE
+  OWN_APARTMENT
+  COMMUNAL
+  DORMITORY
+}
+
+enum Kids {
+  NONE
+  HAVE
+  HAVE_AND_WANT_MORE
+  DONT_WANT
+  WANT
+}
+
+enum Smoking {
+  NEVER
+  SOMETIMES
+  REGULARLY
+  QUIT
+}
+
+enum Alcohol {
+  NEVER
+  RARELY
+  OFTEN
+  QUIT
+}
+
+enum SexualOrientation {
+  HETEROSEXUAL
+  HOMOSEXUAL
+  BISEXUAL
+  PANSEXUAL
+  ASEXUAL
+  DEMISEXUAL
+}
+
+enum Language {
+  RUSSIAN
+  ENGLISH
+  SPANISH
+  FRENCH
+  GERMAN
+  CHINESE
+  JAPANESE
+  OTHER
+}
+
+enum Build {
+  SLIM
+  ATHLETIC
+  AVERAGE
+  STOCKY
+  MUSCULAR
+  OVERWEIGHT
+}
+
+enum PhotosPresence {
+  WITH
+  SOME
+}
+
+enum MediaType {
+  Video
+  Image
+}

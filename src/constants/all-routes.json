@@ -1,0 +1,616 @@
+{
+  "routes": [
+    {
+      "route": {
+        "path": "/api/swagger-ui-init.js",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/api/api/swagger-ui-init.js",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/api",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/api/",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/api-json",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/api-yaml",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/promotional-blocks",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/promotional-blocks",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/promotional-blocks/active",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/promotional-blocks/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/promotional-blocks/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/promotional-blocks/:id/uploadFile",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/promotional-blocks/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/category-types",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/category-types",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/category-types/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/category-types/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/category-types/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/category-types/:id/products",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/category-types/:id/remove-products",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/colors",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/colors",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/colors/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/colors/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/colors/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/sizes",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/sizes",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/sizes/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/sizes/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/sizes/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/care-lists",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/care-lists",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/care-lists/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/care-lists/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/care-lists/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/product-items",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/product-items",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/product-items/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/product-items/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/product-items/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/product-items/:id/upload-media",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/product-items/:id/delete-media",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/users",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/users",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/users/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/users/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/users/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/users/:id/upload-image",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/users/login",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/users/forgot_password",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/users/reset_password",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/:id/validate",
+        "method": "put"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/purchase-stripe",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/purchase-paypal",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/customer/:telegramID",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/customer/:telegramID/orders/:orderId",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/:id/apply-promocode/:promoCode",
+        "method": "put"
+      }
+    },
+    {
+      "route": {
+        "path": "/orders/stripe",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/ad-blocks",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/ad-blocks/active",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/ad-blocks",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/ad-blocks/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/ad-blocks/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/ad-blocks/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/ad-blocks/:id/uploadImage",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/shops",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/shops",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/shops/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/shops/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/shops/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/configurations",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/configurations",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/configurations",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/configurations/send-email",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/customers/available-currencies",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/customers",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/customers/:telegramID/preferred-currency",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/promo-codes",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/promo-codes",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/promo-codes/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/promo-codes/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/promo-codes/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/segments",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/segments/:type",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/segments",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/segments/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/segments/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/designs",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/designs/findAll",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/designs/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/designs/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/designs/:id",
+        "method": "delete"
+      }
+    },
+    {
+      "route": {
+        "path": "/functionalities",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/functionalities/findAll",
+        "method": "post"
+      }
+    },
+    {
+      "route": {
+        "path": "/functionalities/:id",
+        "method": "get"
+      }
+    },
+    {
+      "route": {
+        "path": "/functionalities/:id",
+        "method": "patch"
+      }
+    },
+    {
+      "route": {
+        "path": "/functionalities/:id",
+        "method": "delete"
+      }
+    }
+  ]
+}
