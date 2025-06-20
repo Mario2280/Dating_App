@@ -20,11 +20,17 @@ import {
   IsOptional,
   Max,
   Min,
+  IsArray,
+  IsObject,
 } from 'class-validator';
 
 export default class UserCreateDto {
   @IsString()
   telegram_id: string;
+
+  @IsOptional()
+  @IsString()
+  chat_id?: string;
 
   @IsString()
   name: string;
@@ -36,10 +42,11 @@ export default class UserCreateDto {
 
   @IsOptional()
   @IsEnum(Gender)
-  gender: Gender;
+  gender?: Gender;
 
+  @IsOptional()
   @IsString()
-  bio: string;
+  bio?: string;
 
   @IsOptional()
   @IsEnum(Purpose)
@@ -63,7 +70,7 @@ export default class UserCreateDto {
 
   @IsOptional()
   @IsEnum(Language)
-  languages?: Language;
+  language?: Language;
 
   @IsOptional()
   @IsEnum(SexualOrientation)
@@ -93,12 +100,51 @@ export default class UserCreateDto {
   @IsEnum(Education)
   education?: Education;
 
+  @IsOptional()
+  @IsArray()
+  interests?: string[];
+
+  @IsOptional()
+  @IsInt()
+  notification_settings?: number;
+
+  // Instagram fields
+  @IsOptional()
+  @IsBoolean()
+  instagram_connected?: boolean;
+
+  @IsOptional()
   @IsString()
-  interests: any;
+  instagram_user_id?: string;
+
+  @IsOptional()
+  @IsString()
+  instagram_username?: string;
+
+  @IsOptional()
+  @IsString()
+  instagram_access_token?: string;
+
+  @IsOptional()
+  @IsObject()
+  instagram_profile_data?: any;
 
   @IsBoolean()
   is_visible: boolean;
 
   @IsString()
   location: string;
+
+  @IsString()
+  country_and_city: string;
+
+  // Wallet data
+  @IsOptional()
+  @IsArray()
+  wallets?: Array<{
+    type: 'ton' | 'stripe';
+    address?: string;
+    chain?: string;
+    metadata?: any;
+  }>;
 }

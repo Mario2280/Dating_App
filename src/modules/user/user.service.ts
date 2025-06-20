@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from '@services/prisma.service';
-import {
+import type { PrismaService } from '@services/prisma.service';
+import type {
   UserCreateDto,
   UserUpdateDto,
   UserEntity,
@@ -13,13 +13,39 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userData: UserCreateDto): Promise<UserEntity> {
-    return await this.prisma.profile.create({
-      data: {
-        ...userData,
-        telegram_id: BigInt(userData.telegram_id),
-        last_active: new Date(),
-        created_at: new Date(),
-      },
+    const { wallets, ...profileData } = userData;
+
+    return await this.prisma.$transaction(async (tx) => {
+      // Create profile
+      const profile = await tx.profile.create({
+        data: {
+          ...profileData,
+          telegram_id: BigInt(userData.telegram_id),
+          chat_id: userData.chat_id ? BigInt(userData.chat_id) : null,
+          last_active: new Date(),
+          created_at: new Date(),
+          interests: userData.interests || [],
+          notification_settings: userData.notification_settings || 47, // Default: all enabled except super_likes
+        },
+      });
+
+      // Create wallets if provided
+      if (wallets && wallets.length > 0) {
+        for (const walletData of wallets) {
+          await tx.wallet.create({
+            data: {
+              profile_id: profile.id,
+              type: walletData.type,
+              address: walletData.address,
+              chain: walletData.chain,
+              metadata: walletData.metadata || {},
+              is_default: true, // First wallet is default
+            },
+          });
+        }
+      }
+
+      return profile;
     });
   }
 
@@ -31,7 +57,7 @@ export class UserService {
           ST_GeomFromText(u.location, 4326)::geography,
           ST_GeomFromText(${filters.location}, 4326)::geography
         ) / 1000 AS distance_km
-      FROM "user" u
+      FROM "Profile" u
       WHERE ST_DWithin(
         ST_GeomFromText(u.location, 4326)::geography,
         ST_GeomFromText(${filters.location}, 4326)::geography,
@@ -51,6 +77,14 @@ export class UserService {
       where: {
         telegram_id,
       },
+      include: {
+        wallet: true,
+        gallery: {
+          include: {
+            media: true,
+          },
+        },
+      },
     });
   }
 
@@ -62,6 +96,42 @@ export class UserService {
         last_active: new Date(),
       },
     });
+  }
+
+  async updateNotificationSettings(
+    telegram_id: bigint,
+    settings: number,
+  ): Promise<UserEntity> {
+    return this.prisma.profile.update({
+      where: { telegram_id },
+      data: {
+        notification_settings: settings,
+        last_active: new Date(),
+      },
+    });
+  }
+
+  // Helper method to check if specific notification is enabled
+  isNotificationEnabled(
+    settings: number,
+    notificationType:
+      | 'matches'
+      | 'messages'
+      | 'likes'
+      | 'super_likes'
+      | 'promotions'
+      | 'updates',
+  ): boolean {
+    const bitMap = {
+      matches: 0,
+      messages: 1,
+      likes: 2,
+      super_likes: 3,
+      promotions: 4,
+      updates: 5,
+    };
+
+    return (settings & (1 << bitMap[notificationType])) !== 0;
   }
 
   private buildSqlConditions(where: UserFilterDto): Prisma.Sql {
@@ -86,7 +156,6 @@ export class UserService {
       conditions = Prisma.sql`${conditions} AND u.gender = ${where.gender}`;
     }
 
-    // Фильтр по цели знакомств
     if (where.purpose) {
       conditions = Prisma.sql`${conditions} AND u.purpose = ${where.purpose}`;
     }
@@ -113,7 +182,6 @@ export class UserService {
       conditions = Prisma.sql`${conditions} AND u.languages @> ${JSON.stringify(where.languages)}::jsonb`;
     }
 
-    // Фильтр по ориентации
     if (where.orientation) {
       conditions = Prisma.sql`${conditions} AND u.orientation = ${where.orientation}`;
     }
