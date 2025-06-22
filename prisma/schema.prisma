@@ -408,10 +408,7 @@ enum Build {
   OVERWEIGHT
 }
 
-enum PhotosPresence {
-  WITH
-  SOME
-}
+
 
 enum MediaType {
   Video

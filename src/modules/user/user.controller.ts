@@ -13,9 +13,10 @@ import {
   UserUpdateDto,
   UserEntity,
   UserFilterDto,
+  UserValidateDto,
 } from '@validation/user';
 
-@Controller('users')
+@Controller('profile')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -42,8 +43,8 @@ export class UserController {
     return this.userService.update(BigInt(id), updateUserDto);
   }
 
-  //@Delete(':id')
-  //async remove(@Param('id') id: string): Promise<void> {
-  //  await this.userService.remove(BigInt(id));
-  //}
+  @Post('validate')
+  validate(@Body() validateUserDto: UserValidateDto) {
+    return this.userService.isValidateTelegramData(validateUserDto);
+  }
 }

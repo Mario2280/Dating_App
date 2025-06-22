@@ -21,9 +21,13 @@ import {
   LivingConditions,
   Income,
   Education,
-  Gender,
-  PhotosPresence,
 } from '@prisma/client';
+
+export enum Gender {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  ALL = 'ALL',
+}
 
 export default class UserFilterDto {
   @IsNumber()
@@ -32,7 +36,7 @@ export default class UserFilterDto {
   minAge?: number;
 
   @IsNumber()
-  @Max(80)
+  @Max(222)
   @IsOptional()
   maxAge?: number;
 
@@ -41,20 +45,7 @@ export default class UserFilterDto {
   gender?: Gender;
 
   @IsString()
-  @IsOptional()
-  interests?: string;
-
-  @IsString()
-  @IsOptional()
   location: string;
-
-  @IsNumber()
-  @IsOptional()
-  distance: number;
-
-  @IsString()
-  @IsOptional()
-  city: number;
 
   @IsOptional()
   @IsEnum(Purpose)
@@ -89,9 +80,8 @@ export default class UserFilterDto {
   build?: Build;
 
   @IsOptional()
-  @IsArray()
-  @IsEnum(Language, { each: true })
-  languages?: Language[];
+  @IsEnum(Language)
+  language?: Language;
 
   @IsOptional()
   @IsEnum(SexualOrientation)
@@ -127,10 +117,6 @@ export default class UserFilterDto {
   radius?: number; // в километрах
 
   @IsOptional()
-  @IsEnum(PhotosPresence)
-  photoPresence?: PhotosPresence;
-
-  @IsOptional()
   @IsBoolean()
   is_visible: boolean;
 
@@ -146,12 +132,4 @@ export default class UserFilterDto {
   @IsNumber()
   @IsOptional()
   skip?: number;
-
-  @IsString()
-  @IsOptional()
-  orderBy?: 'age' | 'location';
-
-  @IsString()
-  @IsOptional()
-  orderDirection?: 'asc' | 'desc';
 }

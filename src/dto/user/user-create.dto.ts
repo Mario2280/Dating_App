@@ -137,7 +137,6 @@ export default class UserCreateDto {
 
   @IsString()
   country_and_city: string;
-
   // Wallet data
   @IsOptional()
   @IsArray()

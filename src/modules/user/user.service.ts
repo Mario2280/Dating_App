@@ -1,16 +1,25 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
-import type { PrismaService } from '@services/prisma.service';
+import { PrismaService } from '@services/prisma.service';
 import type {
   UserCreateDto,
   UserUpdateDto,
   UserEntity,
   UserFilterDto,
+  UserValidateDto,
 } from '@validation/user';
-
+import { Gender } from '@validation/user/user-filter.dto';
+import * as crypto from 'crypto';
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly botToken: string;
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {
+    this.botToken = configService.get('TELEGRAM_BOT_TOKEN');
+  }
 
   async create(userData: UserCreateDto): Promise<UserEntity> {
     const { wallets, ...profileData } = userData;
@@ -28,7 +37,6 @@ export class UserService {
           notification_settings: userData.notification_settings || 47, // Default: all enabled except super_likes
         },
       });
-
       // Create wallets if provided
       if (wallets && wallets.length > 0) {
         for (const walletData of wallets) {
@@ -137,10 +145,6 @@ export class UserService {
   private buildSqlConditions(where: UserFilterDto): Prisma.Sql {
     let conditions = Prisma.empty;
 
-    if (where.location !== undefined) {
-      conditions = Prisma.sql`${conditions} AND u.last_active > CURRENT_DATE - INTERVAL '${where.last_active_older_than_months} months'`;
-    }
-
     if (where.last_active_older_than_months !== undefined) {
       conditions = Prisma.sql`${conditions} AND u.last_active > CURRENT_DATE - INTERVAL '${where.last_active_older_than_months} months'`;
     }
@@ -149,10 +153,10 @@ export class UserService {
     }
 
     if (where.maxAge) {
-      conditions = Prisma.sql`${conditions} AND u.age >= ${where.maxAge}`;
+      conditions = Prisma.sql`${conditions} AND u.age <= ${where.maxAge}`;
     }
 
-    if (where.gender) {
+    if (where.gender && where.gender !== Gender.ALL) {
       conditions = Prisma.sql`${conditions} AND u.gender = ${where.gender}`;
     }
 
@@ -178,8 +182,8 @@ export class UserService {
       conditions = Prisma.sql`${conditions} AND u.build = ${where.build}`;
     }
 
-    if (where.languages) {
-      conditions = Prisma.sql`${conditions} AND u.languages @> ${JSON.stringify(where.languages)}::jsonb`;
+    if (where.language) {
+      conditions = Prisma.sql`${conditions} AND u.languages @> ${JSON.stringify(where.language)}::jsonb`;
     }
 
     if (where.orientation) {
@@ -215,5 +219,39 @@ export class UserService {
     }
 
     return conditions;
+  }
+
+  isValidateTelegramData(data: UserValidateDto) {
+    console.log(data);
+
+    const { hash, ...dataCheck } = Object.fromEntries(
+      Object.entries(data).filter(([_, v]) => v !== undefined),
+    );
+    const dataCheckString = Object.keys(dataCheck)
+      .sort()
+      .map((key) => `${key}=${data[key]}`)
+      .join('\n');
+
+    const secretKey = crypto
+      .createHash('sha256')
+      .update(this.botToken)
+      .digest();
+
+    const hmac = crypto
+      .createHmac('sha256', secretKey)
+      .update(dataCheckString)
+      .digest('hex');
+
+    const isValid = hmac === hash;
+    console.log(isValid);
+    if (!isValid) {
+      return {
+        isValid,
+      };
+    }
+    return {
+      isValid,
+      profile: {},
+    };
   }
 }

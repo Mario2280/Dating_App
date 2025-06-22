@@ -8,12 +8,12 @@ export class PaymentService {
   constructor(private prisma: PrismaService) {}
 
   async create(createDto: PaymentCreateDto) {
-    return this.prisma.payment.create({
-      data: {
-        ...createDto,
-        user_id: BigInt(createDto.user_id),
-      },
-    });
+    //return this.prisma.payment.create({
+    //  data: {
+    //    ...createDto,
+    //    user_id: BigInt(createDto.user_id),
+    //  },
+    //});
   }
 
   async findAll() {

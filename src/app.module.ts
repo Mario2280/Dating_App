@@ -1,4 +1,4 @@
-import { NotificationModule } from './modules/notification/notification.module';
+//import { NotificationModule } from './modules/notification/notification.module';
 import { UserGalleryModule } from '@modules/user_gallery/user_gallery.module';
 import { UserModule } from './modules/user/user.module';
 import { ChatModule } from '@modules/chat/chat.module';
@@ -11,12 +11,12 @@ import { MediaModule } from '@modules/media/media.module';
 import { Module } from '@nestjs/common';
 @Module({
   imports: [
-        NotificationModule, 
-    UserGalleryModule,
+    //NotificationModule,
+    //UserGalleryModule,
     UserModule,
-    MessageModule,
-    ChatModule,
-    MediaModule,
+    //MessageModule,
+    //ChatModule,
+    //MediaModule,
   ],
   controllers: [],
   providers: [], //ChatGateway
